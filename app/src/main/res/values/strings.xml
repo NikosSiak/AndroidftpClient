@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ftpClient</string>
+    <string name="title_activity_server_files">ServerFiles</string>
+</resources>
