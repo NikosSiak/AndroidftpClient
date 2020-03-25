@@ -145,12 +145,13 @@ public class ServerFiles extends AppCompatActivity implements TaskCompletedFTPFi
                 }
             } else if (function.equals("download")) {
                 if (isExternalStorageWritable()) {
-                    File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/", filename);
                     try {
+                        ftp.setFileType(BINARY_FILE_TYPE);
+                        File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/Download/", filename);
                         OutputStream fos = new BufferedOutputStream(new FileOutputStream(file));
                         ftp.retrieveFile(filename, fos);
                         fos.close();
-                    } catch (Exception e) {
+                    } catch (IOException e) {
                         e.printStackTrace();
                     }
                 }
@@ -160,6 +161,7 @@ public class ServerFiles extends AppCompatActivity implements TaskCompletedFTPFi
                 filename = tmp[1];
                 File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),filename);
                 try{
+                    ftp.setFileType(BINARY_FILE_TYPE);
                     FileInputStream fis = new FileInputStream(file);
                     ftp.storeFile(tmp2[tmp2.length-1],fis);
                     fis.close();
