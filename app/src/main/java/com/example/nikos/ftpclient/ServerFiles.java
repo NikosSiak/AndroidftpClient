@@ -2,9 +2,12 @@ package com.example.nikos.ftpclient;
 
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.OpenableColumns;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -23,6 +26,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import static org.apache.commons.net.ftp.FTP.BINARY_FILE_TYPE;
@@ -100,11 +104,18 @@ public class ServerFiles extends AppCompatActivity implements TaskCompletedFTPFi
         private TaskCompletedFTPFiles mCallback;
         private String function;
         private String filename;
+        private Uri uri;
 
         public FtpClient(Context context, String function, String filename) {
             this.mCallback = (TaskCompletedFTPFiles) context;
             this.function = function;
             this.filename = filename;
+        }
+
+        public FtpClient(Context context, String function, Uri uri) {
+            this.mCallback = (TaskCompletedFTPFiles) context;
+            this.function = function;
+            this.uri = uri;
         }
 
         @Override
@@ -156,15 +167,11 @@ public class ServerFiles extends AppCompatActivity implements TaskCompletedFTPFi
                     }
                 }
             } else if (function.equals("upload")){
-                String tmp[] = filename.split("primary:");
-                String tmp2[] = tmp[1].split("/");
-                filename = tmp[1];
-                File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath(),filename);
                 try{
                     ftp.setFileType(BINARY_FILE_TYPE);
-                    FileInputStream fis = new FileInputStream(file);
-                    ftp.storeFile(tmp2[tmp2.length-1],fis);
-                    fis.close();
+                    InputStream inputStream = getApplicationContext().getContentResolver().openInputStream(this.uri);
+                    ftp.storeFile(getFileName(uri), inputStream);
+                    inputStream.close();
                 } catch (Exception e){
                     e.printStackTrace();
                 }
@@ -212,11 +219,33 @@ public class ServerFiles extends AppCompatActivity implements TaskCompletedFTPFi
         switch (requestCode){
             case 7:
                 if (resultCode==RESULT_OK){
-                    String path = data.getData().getPath();
+                    Uri uri = data.getData();
                     lastCall = "upload";
-                    new FtpClient(ServerFiles.this,"upload",path).execute();
+                    new FtpClient(ServerFiles.this,"upload", uri).execute();
                 }
                 break;
         }
+    }
+
+    public String getFileName(Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            Cursor cursor = getContentResolver().query(uri, null, null, null, null);
+            try {
+                if (cursor != null && cursor.moveToFirst()) {
+                    result = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                }
+            } finally {
+                cursor.close();
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
     }
 }
