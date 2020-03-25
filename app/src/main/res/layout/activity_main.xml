@@ -24,7 +24,7 @@
         app:layout_constraintTop_toBottomOf="@+id/password"
         app:layout_constraintVertical_bias="0.0" />
 
-    <AutoCompleteTextView
+    <EditText
         android:id="@+id/ip"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
@@ -39,7 +39,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <AutoCompleteTextView
+    <EditText
         android:id="@+id/port"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
@@ -54,7 +54,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/ip" />
 
-    <AutoCompleteTextView
+    <EditText
         android:id="@+id/username"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
